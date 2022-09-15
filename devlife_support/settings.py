@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     "drf_yasg",
     "dj_rest_auth",
     "corsheaders",
+    "freire",
+    "django_tables2"
 ]
 
 SITE_ID=1
@@ -78,7 +80,7 @@ ROOT_URLCONF = "devlife_support.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": ["frontend/"],
+        "DIRS": ["frontend/","freire/dashboard/"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
