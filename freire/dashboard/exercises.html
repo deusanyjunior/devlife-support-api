@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load render_table from django_tables2 %}
+
+{% block content %}
+
+{{ exercises }}
+
+<div class="container">
+    <form method="post" class="form-group">
+        {% csrf_token %}
+        <select name="offering" class="filter-selectbox">
+            {% for offer in offerings %}
+                <option 
+                    value="{{ offer.id }}"
+                    {% if offer.id == offering %} selected {% endif %}>
+                    {{ offer.description }}</option>
+            {% endfor %} 
+        </select>
+
+        <select name="topic" class="filter-selectbox">
+            {% for tpc in topics %}
+                <option 
+                    value="{{ tpc }}"
+                    {% if tpc == topic %} selected {% endif %}>
+                    {{ tpc }}</option>
+            {% endfor %} 
+        </select>
+
+        <select name="group" class="filter-selectbox">
+            {% for grp in groups %}
+                <option 
+                    value="{{ grp }}"
+                    {% if grp == group %} selected {% endif %}>
+                    {{ grp }}</option>
+            {% endfor %} 
+        </select>
+
+        <select name="type" class="filter-selectbox">
+            {% for tp in types %}
+                <option 
+                    value="{{ tp }}"
+                    {% if tp == type %} selected {% endif %}>
+                    {{ tp }}</option>
+            {% endfor %} 
+        </select>
+
+        <button type="submit" class="btn btn-secondary btn-lg btn-block">Update list</button>
+    </form>
+
+    <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Exercises Table</h5>
+          {% render_table exercises_table %}
+        </div>
+      </div>
+</div>
+
+{% endblock %}

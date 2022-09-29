@@ -4,7 +4,7 @@ from core.models import Answer, Student, Exercise, UserAnswerSummary
 class StudentTable(tables.Table):
     class Meta:
         model = Student
-        template_name = "django_tables2/bootstrap.html"
+        template_name = "django_tables2/bootstrap4.html"
         fields = ("id", "username", "first_name", "last_name", "email", "is_active", "date_joined")
         row_attrs = {
             'onClick': lambda record: "document.location.href='/freire/student/{0}/';".format(record.id)
@@ -28,3 +28,6 @@ class ExerciseTable(tables.Table):
         model = Exercise
         template_name = "django_tables2/bootstrap4.html"
         fields = ("offering", "allow_submissions", "slug", "url", "topic", "group", "type")
+        row_attrs = {
+            'onClick': lambda record: "document.location.href='/freire/exercise/{0}/';".format(record.id)
+        }

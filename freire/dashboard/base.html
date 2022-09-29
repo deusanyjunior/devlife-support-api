@@ -9,12 +9,13 @@
   </head>
 <body>
 
-  <nav>
-    <a href="{% url 'students' %}">Students</a>
-    <a href="{% url 'exercises' %}">Exercises</a>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light"> 
+    <a class="nav-link" href="{% url 'students' %}">Students</a> 
+    <a class="nav-link" href="{% url 'exercises' %}">Exercises</a>
   </nav>
 
-  {% block content %}{% endblock %}
+  {% block content %}
+  {% endblock %}
 
 </body>
 </html>
