@@ -14,7 +14,7 @@
             {% for offer in offerings %}
                 <option 
                     value="{{ offer.id }}"
-                    {% if offer.id == offering %} selected {% endif %}>
+                    {% if offer.id|floatformat:"0" == offering %} selected {% endif %}>
                     {{ offer.description }}</option>
             {% endfor %} 
         </select>
