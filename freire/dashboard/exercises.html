@@ -5,8 +5,6 @@
 
 {% block content %}
 
-{{ exercises }}
-
 <div class="container">
     <form method="post" class="form-group">
         {% csrf_token %}
@@ -54,7 +52,108 @@
           <h5 class="card-title">Exercises Table</h5>
           {% render_table exercises_table %}
         </div>
-      </div>
+    </div>
+
+    <div class="card">
+        <h3>Plots with points</h3>
+        <div class="card-columns">
+            {% for key, data in exercises_data.items %}
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ key }}</h5>
+                        <canvas id="{{ key }}"></canvas>
+                    </div>
+                </div>
+                    
+                <script>
+                    key = document.getElementById("{{ key }}").getContext("2d");
+                
+                    key = new Chart(key, {
+                    type: "bar",
+                    data: {
+                        labels: [ {{ data.points.keys|join:", " }} ],
+                        datasets: [
+                            {
+                            label: "Points",
+                            backgroundColor: "#79AEC8",
+                            borderColor: "#417690",
+                            data: [ {{ data.points.values|join:", " }} ]
+                            }
+                        ]
+                    },
+                    options: {
+                        title: {
+                            text: "Quantity of points",
+                            display: true
+                        }
+                    }
+                    });
+                </script>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- <div class="card">
+        <h3 class="card-title">Plots per day</h3>
+        <div class="card">
+            <script>
+                function getRandomColor() {
+                    var letters = '0123456789ABCDEF'.split('');
+                    var color = '#';
+                    for (var i = 0; i < 6; i++ ) {
+                        color += letters[Math.floor(Math.random() * 16)];
+                    }
+                    return color;
+                }
+            </script>
+        {% for key, data in exercises_data.items %}
+            <div class="card w-75">
+                <div class="card-body">
+                    <h5 class="card-title">{{ key }}</h5>
+                    <canvas id="{{ key }}"></canvas>
+                </div>
+            </div>
+            
+            <script>
+            key = document.getElementById("{{ key }}").getContext("2d");
+        
+            key = new Chart(key, {
+                type: "bar",
+                data: {
+                labels: {{ data.days|safe }},
+                datasets: [
+                    {% for key, values in data.dataset.items %}
+                        {
+                            label: "{{ key }}",
+                            data: [ {{ values|join:", " }} ],
+                            backgroundColor: getRandomColor(),
+                        },
+                    {% endfor %}
+                ]
+                },
+                options: {
+                plugins: {
+                title: {
+                    display: true,
+                    text: "Points per day"
+                },
+                },
+                responsive: true,
+                scales: {
+                    xAxes:[{
+                    stacked: true
+                    }],
+                    yAxes:[{
+                    stacked: true
+                    }],
+                }
+                }
+            });
+            </script>
+        {% endfor %}
+        </div>
+    </div> -->
+    
 </div>
 
 {% endblock %}

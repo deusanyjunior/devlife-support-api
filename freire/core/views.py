@@ -45,14 +45,14 @@ def exercises(request):
     offerings = list(Offering.objects.all().values())
 
     exercises = list(Exercise.objects.all().values())
-    groups = []
+    groups = [] # models.Shop.objects.order_by().values_list('city').distinct()
     topics = []
     types = []
     for exercise in exercises:
-        if exercise['group'] not in groups:
-            groups.append( exercise['group'] )
         if exercise['topic'] not in topics:
             topics.append( exercise['topic'] )
+        if exercise['group'] not in groups:
+            groups.append( exercise['group'] )
         if exercise['type'] not in types:
             types.append( exercise['type'] )
 
@@ -68,16 +68,26 @@ def exercises(request):
     type = request.POST.get('type', False)
     if type == False:
         type = types[0]
-    
+
     filters = {
         'offering': offering,
-        'group': group,
         'topic': topic,
+        'group': group,
         'type': type
     }
 
     exercises_table = ExerciseTable(Exercise.objects.filter(**filters))
     RequestConfig(request, paginate={"per_page": 10}).configure(exercises_table)
+
+    exercises_list = Exercise.objects.filter(**filters)
+    exercises_data = {}
+    for exercise in exercises_list:
+        points, days, dataset = get_exercises_answers(exercise, 'day')
+        exercises_data[exercise] = {
+            'points': points,
+            'days': days,
+            'dataset': dataset
+        }
     
     return render(request, 'exercises.html', {
         'offering': offering,
@@ -88,16 +98,29 @@ def exercises(request):
         'topic': topic,
         'types': list(types),
         'type': type,
-        'exercises_table': exercises_table
+        'exercises_table': exercises_table,
+        'exercises_list': list(exercises_list.values()),
+        'exercises_data': exercises_data
     })
     
 def exercise_info(request, ex_slug):
     scales = ['day','hour','minute']
+    #TODO: consider scale
     scale = request.POST.get('scale', False)
     if scale == False:
         scale = scales[0]
 
     exercise = get_object_or_404(Exercise, id = ex_slug)
+    points, days, dataset = get_exercises_answers(ex_slug, scale)
+
+    return render(request, 'exercise.html', {
+        'exercise': exercise,
+        'points': points,
+        'days': days,
+        'dataset': dataset
+    })
+
+def get_exercises_answers(ex_slug, scale):
     filters = {
         'exercise': ex_slug
     }
@@ -139,15 +162,4 @@ def exercise_info(request, ex_slug):
                 dataset[ point ].append( submissions[day][point] )
             else:
                 dataset[ point ].append( 0 )
-
-    return render(request, 'exercise.html', {
-        'exercise': exercise,
-        'answers': list(answers.values()),
-        'points': points,
-        'scales': list(scales),
-        'scale': scale,
-        'submissions': submissions,
-        'days': days,
-        'points_list': points_list,
-        'dataset': dataset
-    })
+    return points, days, dataset 
