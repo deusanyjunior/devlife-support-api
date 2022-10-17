@@ -6,42 +6,41 @@
 {% block content %}
 
 <div class="container">
-    <form method="post" class="form-group">
-        {% csrf_token %}
+    <form method="get" class="form-group">
         <select name="offering" class="filter-selectbox">
             {% for offer in offerings %}
-                <option 
+                <option
                     value="{{ offer.id }}"
                     {% if offer.id|floatformat:"0" == offering %} selected {% endif %}>
                     {{ offer.description }}</option>
-            {% endfor %} 
+            {% endfor %}
         </select>
 
         <select name="topic" class="filter-selectbox">
             {% for tpc in topics %}
-                <option 
+                <option
                     value="{{ tpc }}"
                     {% if tpc == topic %} selected {% endif %}>
                     {{ tpc }}</option>
-            {% endfor %} 
+            {% endfor %}
         </select>
 
         <select name="group" class="filter-selectbox">
             {% for grp in groups %}
-                <option 
+                <option
                     value="{{ grp }}"
                     {% if grp == group %} selected {% endif %}>
                     {{ grp }}</option>
-            {% endfor %} 
+            {% endfor %}
         </select>
 
         <select name="type" class="filter-selectbox">
             {% for tp in types %}
-                <option 
+                <option
                     value="{{ tp }}"
                     {% if tp == type %} selected {% endif %}>
                     {{ tp }}</option>
-            {% endfor %} 
+            {% endfor %}
         </select>
 
         <button type="submit" class="btn btn-secondary btn-lg btn-block">Update list</button>
@@ -64,11 +63,11 @@
                         <canvas id="{{ key }}"></canvas>
                     </div>
                 </div>
-                    
+
                 <script>
-                    key = document.getElementById("{{ key }}").getContext("2d");
-                
-                    key = new Chart(key, {
+                    let key{{ forloop.counter }} = document.getElementById("{{ key }}").getContext("2d");
+
+                    new Chart(key{{ forloop.counter }}, {
                     type: "bar",
                     data: {
                         labels: [ {{ data.points.keys|join:", " }} ],
@@ -93,7 +92,7 @@
         </div>
     </div>
 
-    <!-- <div class="card">
+    <div class="card">
         <h3 class="card-title">Plots per day</h3>
         <div class="card">
             <script>
@@ -110,14 +109,14 @@
             <div class="card w-75">
                 <div class="card-body">
                     <h5 class="card-title">{{ key }}</h5>
-                    <canvas id="{{ key }}"></canvas>
+                    <canvas id="{{ key }}-days"></canvas>
                 </div>
             </div>
-            
+
             <script>
-            key = document.getElementById("{{ key }}").getContext("2d");
-        
-            key = new Chart(key, {
+            let keyDays{{ forloop.counter }} = document.getElementById("{{ key }}-days").getContext("2d");
+
+            key = new Chart(keyDays{{ forloop.counter }}, {
                 type: "bar",
                 data: {
                 labels: {{ data.days|safe }},
@@ -152,8 +151,8 @@
             </script>
         {% endfor %}
         </div>
-    </div> -->
-    
+    </div>
+
 </div>
 
 {% endblock %}

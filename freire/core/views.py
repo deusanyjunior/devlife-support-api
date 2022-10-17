@@ -33,8 +33,8 @@ def student_info(request, st_slug):
         submission_date.append(answer['submission_date'].strftime("%m/%d/%Y %H:%M:%S"))
 
     return render(request, 'student.html', {
-        'student': student, 
-        'answers_table': answers_table, 
+        'student': student,
+        'answers_table': answers_table,
         'answerssummary_table': answerssummary_table,
         'answers': list(answers.values()),
         'points': list(points),
@@ -56,16 +56,16 @@ def exercises(request):
         if exercise['type'] not in types:
             types.append( exercise['type'] )
 
-    offering = request.POST.get('offering', False)
+    offering = request.GET.get('offering', False)
     if offering == False:
         offering = offerings[len(offerings) -1 ]['id']
-    group = request.POST.get('group', False)
+    group = request.GET.get('group', False)
     if group == False:
         group = groups[0]
-    topic = request.POST.get('topic', False)
+    topic = request.GET.get('topic', False)
     if topic == False:
         topic = topics[0]
-    type = request.POST.get('type', False)
+    type = request.GET.get('type', False)
     if type == False:
         type = types[0]
 
@@ -88,7 +88,7 @@ def exercises(request):
             'days': days,
             'dataset': dataset
         }
-    
+
     return render(request, 'exercises.html', {
         'offering': offering,
         'offerings': offerings,
@@ -102,7 +102,7 @@ def exercises(request):
         'exercises_list': list(exercises_list.values()),
         'exercises_data': exercises_data
     })
-    
+
 def exercise_info(request, ex_slug):
     scales = ['day','hour','minute']
     #TODO: consider scale
@@ -162,4 +162,4 @@ def get_exercises_answers(ex_slug, scale):
                 dataset[ point ].append( submissions[day][point] )
             else:
                 dataset[ point ].append( 0 )
-    return points, days, dataset 
+    return points, days, dataset
