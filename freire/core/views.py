@@ -5,6 +5,8 @@ from django_tables2 import SingleTableView, RequestConfig
 from core.models import Answer, Offering, Student, Exercise, UserAnswerSummary
 from .tables import AnswersTable, StudentTable, ExerciseTable, UserAnswerSummaryTable
 
+from collections import OrderedDict
+
 class StudentListView(SingleTableView):
     model = Student
     table_class = StudentTable
@@ -44,17 +46,10 @@ def student_info(request, st_slug):
 def exercises(request):
     offerings = list(Offering.objects.all().values())
 
-    exercises = list(Exercise.objects.all().values())
-    groups = [] # models.Shop.objects.order_by().values_list('city').distinct()
-    topics = []
-    types = []
-    for exercise in exercises:
-        if exercise['topic'] not in topics:
-            topics.append( exercise['topic'] )
-        if exercise['group'] not in groups:
-            groups.append( exercise['group'] )
-        if exercise['type'] not in types:
-            types.append( exercise['type'] )
+    exercises = Exercise.objects.all().values()
+    groups = exercises.values_list('group', flat=True).distinct()
+    topics = exercises.values_list('topic', flat=True).distinct()
+    types = exercises.values_list('type', flat=True).distinct()
 
     offering = request.GET.get('offering', False)
     if offering == False:
@@ -84,6 +79,7 @@ def exercises(request):
     for exercise in exercises_list:
         points, days, dataset = get_exercises_answers(exercise, 'day')
         exercises_data[exercise] = {
+            'id': exercise.id,
             'points': points,
             'days': days,
             'dataset': dataset
@@ -130,28 +126,31 @@ def get_exercises_answers(ex_slug, scale):
     points = {}
     submissions = {}
     for answer in answers.values():
+        point_adjusted = adjust_point(answer['points'])
         if answer['points'] not in points.keys():
-            points[answer['points']] = 1
+            points[point_adjusted] = 1
         else:
-            points[answer['points']] += 1
+            points[point_adjusted] += 1
         if scale == 'day':
             day = answer['submission_date'].strftime("%d/%m/%Y")
             if day not in submissions.keys():
                 submissions[ day ] = {
-                    answer['points']: 1
+                    point_adjusted : 1
                 }
             else:
                 if answer['points'] not in submissions[ day ].keys():
-                    submissions[ day ][answer['points']] = 1
+                    submissions[ day ][point_adjusted] = 1
                 else:
-                    submissions[ day ][answer['points']] += 1
-
+                    submissions[ day ][point_adjusted] += 1
+    
+    points = OrderedDict(sorted(points.items(),reverse=True))
     days = list(submissions.keys())
     points_list = []
     for submission in submissions.values():
         for point in submission.keys():
             if point not in points_list:
                 points_list.append(point)
+                
     points_list.sort(reverse=True)
     dataset = {}
     for point in points_list:
@@ -163,3 +162,19 @@ def get_exercises_answers(ex_slug, scale):
             else:
                 dataset[ point ].append( 0 )
     return points, days, dataset
+
+
+def adjust_point(point):
+    if point >= 1:
+        return "1.0"
+    elif point > 0.66 and point < 1:
+        return "0.99"
+    elif point > 0.33 and point <= 0.66:
+        return "0.66"
+    elif point > 0 and point <= 0.33:
+        return "0.33"
+    else: 
+        return "0.0"
+
+def points_scale():
+    return "1,"

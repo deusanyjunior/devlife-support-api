@@ -59,7 +59,7 @@
             {% for key, data in exercises_data.items %}
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">{{ key }}</h5>
+                        <a href="/freire/exercise/{{data.id}}/"><h5 class="card-title">{{ key }}</h5></a>
                         <canvas id="{{ key }}"></canvas>
                     </div>
                 </div>
@@ -96,19 +96,25 @@
         <h3 class="card-title">Plots per day</h3>
         <div class="card">
             <script>
-                function getRandomColor() {
-                    var letters = '0123456789ABCDEF'.split('');
-                    var color = '#';
-                    for (var i = 0; i < 6; i++ ) {
-                        color += letters[Math.floor(Math.random() * 16)];
+                function getRandomColor(point) {
+                    switch (point) {
+                        case "1.0":
+                            return 'green';
+                        case "0.99": 
+                            return 'blue';
+                        case "0.66": 
+                            return 'yellow';
+                        case "0.33": 
+                            return 'pink';                    
+                        default:
+                            return 'red';
                     }
-                    return color;
                 }
             </script>
         {% for key, data in exercises_data.items %}
             <div class="card w-75">
                 <div class="card-body">
-                    <h5 class="card-title">{{ key }}</h5>
+                    <a href="/freire/exercise/{{data.id}}/"><h5 class="card-title">{{ key }}</h5></a>
                     <canvas id="{{ key }}-days"></canvas>
                 </div>
             </div>
@@ -125,7 +131,7 @@
                         {
                             label: "{{ key }}",
                             data: [ {{ values|join:", " }} ],
-                            backgroundColor: getRandomColor(),
+                            backgroundColor: getRandomColor("{{ key }}"),
                         },
                     {% endfor %}
                 ]

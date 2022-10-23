@@ -86,7 +86,7 @@
                     {
                         label: "{{ key }}",
                         data: [ {{ values|join:", " }} ],
-                        backgroundColor: getRandomColor(),
+                        backgroundColor: getRandomColor("{{key}}"),
                     },
                 {% endfor %}
             ]
@@ -109,13 +109,19 @@
             }
           }
         });
-        function getRandomColor() {
-            var letters = '0123456789ABCDEF'.split('');
-            var color = '#';
-            for (var i = 0; i < 6; i++ ) {
-                color += letters[Math.floor(Math.random() * 16)];
+        function getRandomColor(point) {
+            switch (point) {
+                case "1.0":
+                    return 'green';
+                case "0.99": 
+                    return 'blue';
+                case "0.66": 
+                    return 'yellow';
+                case "0.33": 
+                    return 'pink';                    
+                default:
+                    return 'red';
             }
-            return color;
         }
       </script>
     </div>
