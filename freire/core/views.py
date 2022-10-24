@@ -127,7 +127,7 @@ def get_exercises_answers(ex_slug, scale):
     submissions = {}
     for answer in answers.values():
         point_adjusted = adjust_point(answer['points'])
-        if answer['points'] not in points.keys():
+        if point_adjusted not in points.keys():
             points[point_adjusted] = 1
         else:
             points[point_adjusted] += 1
@@ -138,19 +138,19 @@ def get_exercises_answers(ex_slug, scale):
                     point_adjusted : 1
                 }
             else:
-                if answer['points'] not in submissions[ day ].keys():
+                if point_adjusted not in submissions[ day ].keys():
                     submissions[ day ][point_adjusted] = 1
                 else:
                     submissions[ day ][point_adjusted] += 1
-    
-    points = OrderedDict(sorted(points.items(),reverse=True))
+
+    points = OrderedDict(sorted(points.items()))
     days = list(submissions.keys())
     points_list = []
     for submission in submissions.values():
         for point in submission.keys():
             if point not in points_list:
                 points_list.append(point)
-                
+
     points_list.sort(reverse=True)
     dataset = {}
     for point in points_list:
@@ -173,7 +173,7 @@ def adjust_point(point):
         return "0.66"
     elif point > 0 and point <= 0.33:
         return "0.33"
-    else: 
+    else:
         return "0.0"
 
 def points_scale():
