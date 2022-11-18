@@ -6,20 +6,21 @@
 {% block content %}
 
 <div class="container">
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">Exercise info</h5>
-            <p>Offering: {{ exercise.offering }}</p> 
-            <p>Allow submissions: {{ exercise.allow_submissions }} </p>
-            <p>Slug: {{ exercise.slug }}</p>
-            <p>Url: {{ exercise.url }}</p>
-            <p>Topic: {{ exercise.topic }}</p>
-            <p>Group: {{ exercise.group }}</p>
-            <p>Type: {{ exercise.type }}</p>
-          </div>
-        </div>
-    </div>
+  <div class="card">
+      <div class="card-body">
+          <h5 class="card-title">Exercise info</h5>
+          <p>Offering: {{ exercise.offering }}</p> 
+          <p>Allow submissions: {{ exercise.allow_submissions }} </p>
+          <p>Slug: {{ exercise.slug }}</p>
+          <p>Url: {{ exercise.url }}</p>
+          <p>Topic: {{ exercise.topic }}</p>
+          <p>Group: {{ exercise.group }}</p>
+          <p>Type: {{ exercise.type }}</p>
+      </div>
+  </div>
 
+    
+  <div class="card-group">
     <div class="card">
         <div class="card-body">
           <h5 class="card-title">Quantity of points</h5>
@@ -53,77 +54,77 @@
       </script>
     </div>
 
-    <form method="post" class="form-group">
-        {% csrf_token %}
-        <select name="scale" class="filter-selectbox">
-            {% for scl in scales %}
-                <option 
-                    value="{{ scl }}"
-                    {% if scl == scale %} selected {% endif %}>
-                    {{ scl }}</option>
-            {% endfor %} 
-        </select>
-
-        <button type="submit" class="btn btn-secondary btn-lg btn-block">Update scale</button>
-    </form>
-
     <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Points per day</h5>
-          <canvas id="daily-chart"></canvas>
-        </div>
+      <div class="card-body">
+        <h5 class="card-title">Points per day</h5>
+        <form method="get" class="form-group">
+          <select name="scale" class="filter-selectbox">
+              {% for scl in scales %}
+                  <option 
+                      value="{{ scl }}"
+                      {% if scl == scale %} selected {% endif %}>
+                      {{ scl }}</option>
+              {% endfor %} 
+          </select>
+  
+          <button type="submit" class="btn btn-secondary btn-lg btn-block">Update scale</button>
+        </form>
+        <canvas id="daily-chart"></canvas>
       </div>
-    
-      <script>
-        let daily_ctx = document.getElementById("daily-chart").getContext("2d");
-    
-        let chart2 = new Chart(daily_ctx, {
-          type: "bar",
-          data: {
-            labels: {{ days|safe }},
-            datasets: [
-                {% for key, values in dataset.items %}
-                    {
-                        label: "{{ key }}",
-                        data: [ {{ values|join:", " }} ],
-                        backgroundColor: getRandomColor("{{key}}"),
-                    },
-                {% endfor %}
-            ]
-          },
-          options: {
-            plugins: {
-            title: {
-                display: true,
-                text: "Points per day"
-            },
-            },
-            responsive: true,
-            scales: {
-                xAxes:[{
-                stacked: true
-                }],
-                yAxes:[{
-                stacked: true
-                }],
-            }
-          }
-        });
-        function getRandomColor(point) {
-            switch (point) {
-                case "1.0":
-                    return 'green';
-                case "0.99": 
-                    return 'blue';
-                case "0.66": 
-                    return 'yellow';
-                case "0.33": 
-                    return 'pink';                    
-                default:
-                    return 'red';
-            }
-        }
-      </script>
     </div>
+
+  </div>
+    
+    
+  <script>
+    let daily_ctx = document.getElementById("daily-chart").getContext("2d");
+
+    let chart2 = new Chart(daily_ctx, {
+      type: "bar",
+      data: {
+        labels: {{ days|safe }},
+        datasets: [
+            {% for key, values in dataset.items %}
+                {
+                    label: "{{ key }}",
+                    data: [ {{ values|join:", " }} ],
+                    backgroundColor: getRandomColor("{{key}}"),
+                },
+            {% endfor %}
+        ]
+      },
+      options: {
+        plugins: {
+        title: {
+            display: true,
+            text: "Points per day"
+        },
+        },
+        responsive: true,
+        scales: {
+            xAxes:[{
+            stacked: true
+            }],
+            yAxes:[{
+            stacked: true
+            }],
+        }
+      }
+    });
+    function getRandomColor(point) {
+        switch (point) {
+            case "1.0":
+                return 'green';
+            case "0.99": 
+                return 'blue';
+            case "0.66": 
+                return 'yellow';
+            case "0.33": 
+                return 'pink';                    
+            default:
+                return 'red';
+        }
+    }
+  </script>
 </div>
 {% endblock %}

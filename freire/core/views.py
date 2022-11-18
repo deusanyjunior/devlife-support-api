@@ -47,9 +47,27 @@ def exercises(request):
     offerings = list(Offering.objects.all().values())
 
     exercises = Exercise.objects.all().values()
-    groups = exercises.values_list('group', flat=True).distinct()
     topics = exercises.values_list('topic', flat=True).distinct()
+    groups = exercises.values_list('group', flat=True).distinct()
     types = exercises.values_list('type', flat=True).distinct()
+    scales = scales_list()
+
+    topic_classes = {}
+    for top in topics:
+        divider = 0
+        try: 
+            divider = top.index('/')
+        except:
+            divider = len(top)
+        topclass = top[:divider]
+        if divider == len(top): 
+            topelem = '-'
+        else:
+            topelem = top[divider+1:]
+        if topclass not in topic_classes.keys():
+            topic_classes[topclass] = []
+        if topelem not in topic_classes[topclass] :
+            topic_classes[topclass].append(topelem)
 
     offering = request.GET.get('offering', False)
     if offering == False:
@@ -57,27 +75,36 @@ def exercises(request):
     group = request.GET.get('group', False)
     if group == False:
         group = groups[0]
-    topic = request.GET.get('topic', False)
-    if topic == False:
-        topic = topics[0]
+    topic_class = request.GET.get('topic_class', False)
+    if topic_class == False:
+        topic_class = list(topic_classes.keys())[0]
+    topic_item = request.GET.get('topic_item', False)
+    if topic_item == False:
+        topic_item = topic_classes[topic_class][0]
     type = request.GET.get('type', False)
     if type == False:
         type = types[0]
+    scale = request.GET.get('scale', False)
+    if scale == False:
+        scale = scales[0]
 
+    topic_filter = topic_class
+    if topic_item != '-':
+        topic_filter += '/' + topic_item
     filters = {
         'offering': offering,
-        'topic': topic,
+        'topic': 'python/for',
         'group': group,
         'type': type
     }
 
-    exercises_table = ExerciseTable(Exercise.objects.filter(**filters))
+    exercises_list = Exercise.objects.filter(**filters)
+    exercises_table = ExerciseTable(exercises_list)
     RequestConfig(request, paginate={"per_page": 10}).configure(exercises_table)
 
-    exercises_list = Exercise.objects.filter(**filters)
     exercises_data = {}
     for exercise in exercises_list:
-        points, days, dataset = get_exercises_answers(exercise, 'day')
+        points, days, dataset = get_exercises_answers(exercise, scale)
         exercises_data[exercise] = {
             'id': exercise.id,
             'points': points,
@@ -91,18 +118,23 @@ def exercises(request):
         'groups': list(groups),
         'group': group,
         'topics': list(topics),
-        'topic': topic,
+        'topics_items': topic_classes,
+        'topic_class': topic_class,
+        'topic_item': topic_item,
+        'topic_classes': list(topic_classes.keys()),
+        'topic_items': list(topic_classes[topic_class]),
         'types': list(types),
         'type': type,
+        'scales': list(scales),
+        'scale': scale,
         'exercises_table': exercises_table,
         'exercises_list': list(exercises_list.values()),
         'exercises_data': exercises_data
     })
 
 def exercise_info(request, ex_slug):
-    scales = ['day','hour','minute']
-    #TODO: consider scale
-    scale = request.POST.get('scale', False)
+    scales = scales_list()
+    scale = request.GET.get('scale', False)
     if scale == False:
         scale = scales[0]
 
@@ -113,7 +145,9 @@ def exercise_info(request, ex_slug):
         'exercise': exercise,
         'points': points,
         'days': days,
-        'dataset': dataset
+        'dataset': dataset,
+        'scales': scales,
+        'scale': scale
     })
 
 def get_exercises_answers(ex_slug, scale):
@@ -131,17 +165,26 @@ def get_exercises_answers(ex_slug, scale):
             points[point_adjusted] = 1
         else:
             points[point_adjusted] += 1
-        if scale == 'day':
-            day = answer['submission_date'].strftime("%d/%m/%Y")
-            if day not in submissions.keys():
-                submissions[ day ] = {
-                    point_adjusted : 1
-                }
+        
+        timescale = ''
+        if scale == 'weekly':
+            timescale = answer['submission_date'].strftime("%U")
+        elif scale == 'dayly':
+            timescale = answer['submission_date'].strftime("%d/%m/%Y")
+        elif scale == 'hourly':
+            timescale = answer['submission_date'].strftime("%d/%m %H")
+        elif scale == 'every minute':
+            timescale = answer['submission_date'].strftime("%d/%m %H:%M")
+        
+        if timescale not in submissions.keys():
+            submissions[ timescale ] = {
+                point_adjusted : 1
+            }
+        else:
+            if point_adjusted not in submissions[ timescale ].keys():
+                submissions[ timescale ][point_adjusted] = 1
             else:
-                if point_adjusted not in submissions[ day ].keys():
-                    submissions[ day ][point_adjusted] = 1
-                else:
-                    submissions[ day ][point_adjusted] += 1
+                submissions[ timescale ][point_adjusted] += 1
 
     points = OrderedDict(sorted(points.items()))
     days = list(submissions.keys())
@@ -163,18 +206,17 @@ def get_exercises_answers(ex_slug, scale):
                 dataset[ point ].append( 0 )
     return points, days, dataset
 
-
 def adjust_point(point):
     if point >= 1:
-        return "1.0"
-    elif point > 0.66 and point < 1:
-        return "0.99"
-    elif point > 0.33 and point <= 0.66:
-        return "0.66"
-    elif point > 0 and point <= 0.33:
-        return "0.33"
+        return "[1.0]"
+    elif point >= 0.7 and point < 1:
+        return "[0.9,0.7]"
+    elif point >= 0.4 and point < 0.7:
+        return "[0.6,0.4]"
+    elif point > 0 and point < 0.4:
+        return "[0.3,0.1]"
     else:
-        return "0.0"
+        return "[0.0]"
 
-def points_scale():
-    return "1,"
+def scales_list():
+    return ['weekly','dayly','hourly','every minute']

@@ -5,6 +5,28 @@
 
 {% block content %}
 
+<script type="text/javascript">
+    var topic_options = {{ topics_items|safe}};
+
+    function reload_topic_items(self) {
+        var itemsOptions = document.querySelector('#topic_items')
+        
+        Array.from(itemsOptions).forEach((option) => {
+            itemsOptions.removeChild(option)
+        })
+        var classesOptions = document.querySelector('#topic_class')
+        var value = classesOptions.options[classesOptions.selectedIndex].value;
+                
+        var newOptions = topic_options[value].toString().split(',')
+
+        newOptions.map((optionData) => {
+            var opt = document.createElement('option')
+            opt.appendChild(document.createTextNode(optionData));
+            opt.value = optionData
+            itemsOptions.appendChild(opt);
+        })
+    }
+</script>
 <div class="container">
     <form method="get" class="form-group">
         <select name="offering" class="filter-selectbox">
@@ -16,12 +38,21 @@
             {% endfor %}
         </select>
 
-        <select name="topic" class="filter-selectbox">
-            {% for tpc in topics %}
+        <select id="topic_class" name="topic_class" class="filter-selectbox" onchange="reload_topic_items()">
+            {% for topc in topic_classes %}
                 <option
-                    value="{{ tpc }}"
-                    {% if tpc == topic %} selected {% endif %}>
-                    {{ tpc }}</option>
+                    value="{{ topc }}"
+                    {% if topc == topic_class %} selected {% endif %}>
+                    {{ topc }}</option>
+            {% endfor %}
+        </select>
+
+        <select id="topic_items" name="topic_item" class="filter-selectbox">
+            {% for topi in topic_items %}
+                <option
+                    value="{{ topi }}"
+                    {% if topi == topic_item %} selected {% endif %}>
+                    {{ topi }}</option>
             {% endfor %}
         </select>
 
@@ -40,6 +71,15 @@
                     value="{{ tp }}"
                     {% if tp == type %} selected {% endif %}>
                     {{ tp }}</option>
+            {% endfor %}
+        </select>
+
+        <select name="scale" class="filter-selectbox">
+            {% for sc in scales %}
+                <option
+                    value="{{ sc }}"
+                    {% if sc == scale %} selected {% endif %}>
+                    {{ sc }}</option>
             {% endfor %}
         </select>
 
@@ -98,13 +138,13 @@
             <script>
                 function getRandomColor(point) {
                     switch (point) {
-                        case "1.0":
+                        case "[1.0]":
                             return 'green';
-                        case "0.99":
+                        case "[0.9,0.7]":
                             return 'blue';
-                        case "0.66":
+                        case "[0.6,0.4]":
                             return 'yellow';
-                        case "0.33":
+                        case "[0.3,0.1]":
                             return 'pink';
                         default:
                             return 'red';
